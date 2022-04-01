@@ -46,5 +46,8 @@ public class ConfigurationTest {
 
         CombinedConfiguration config = actual.getConfiguration();
         assertNotNull("We expect an test configuration !", config);
+
+        String separator = config.get(String.class, "separator");
+        assertNotNull("We expect an separator !", separator);
     }
 }
