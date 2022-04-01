@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.marabs</groupId>
+        <groupId>de.marabs.analyse</groupId>
         <artifactId>src-analyse</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
@@ -21,10 +21,23 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
+        <commons.config.version>2.7</commons.config.version>
+        <commons.beanutils.version>1.9.4</commons.beanutils.version>
     </properties>
 
     <dependencies>
         <!-- dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>${commons.config.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>${commons.beanutils.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
