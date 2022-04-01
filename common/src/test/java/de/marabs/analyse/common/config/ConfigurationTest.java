@@ -16,7 +16,6 @@
 package de.marabs.analyse.common.config;
 
 import org.apache.commons.configuration2.CombinedConfiguration;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -29,7 +28,7 @@ import static org.junit.Assert.assertNotNull;
 public class ConfigurationTest {
 
     @Test
-    public void loadConfiguration() throws ConfigurationException {
+    public void loadConfiguration() {
         Configuration actual = Configuration.builder().build();
         assertNotNull("We expect an Configuration instance !", actual);
 
@@ -41,7 +40,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void loadTestConfiguration() throws ConfigurationException {
+    public void loadTestConfiguration() {
         Configuration actual = Configuration.builder().isTestConfiguration(true).build();
         assertNotNull("We expect an Configuration instance !", actual);
 
