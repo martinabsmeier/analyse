@@ -27,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 /**
+ * {@code Configuration} is responsible for the configuration of the application.
+ *
  * @author Martin Absmeier
  */
 public class Configuration {
@@ -52,7 +54,6 @@ public class Configuration {
     }
 
     // #################################################################################################################
-
     private void initConfiguration(String configDefinition) throws ConfigurationException {
         Parameters params = new Parameters();
         CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder();
