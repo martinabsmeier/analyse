@@ -23,7 +23,7 @@ import org.apache.commons.configuration2.CombinedConfiguration;
  * @author Martin Absmeier
  */
 class CommonConstants {
-    private static final CombinedConfiguration CONFIG = Configuration.builder().isTestConfiguration(false).build().getConfiguration();
+    private static final CombinedConfiguration CONFIG = Configuration.builder().isTestConfiguration(false).build().getConfig();
 
     public static final String SEPARATOR = CONFIG.get(String.class, "separator");
 

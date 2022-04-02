@@ -32,7 +32,7 @@ public class ConfigurationTest {
         Configuration actual = Configuration.builder().build();
         assertNotNull("We expect an Configuration instance !", actual);
 
-        CombinedConfiguration config = actual.getConfiguration();
+        CombinedConfiguration config = actual.getConfig();
         assertNotNull("We expect an configuration !", config);
 
         String separator = config.get(String.class, "separator");
@@ -44,7 +44,7 @@ public class ConfigurationTest {
         Configuration actual = Configuration.builder().isTestConfiguration(true).build();
         assertNotNull("We expect an Configuration instance !", actual);
 
-        CombinedConfiguration config = actual.getConfiguration();
+        CombinedConfiguration config = actual.getConfig();
         assertNotNull("We expect an test configuration !", config);
 
         String separator = config.get(String.class, "separator");

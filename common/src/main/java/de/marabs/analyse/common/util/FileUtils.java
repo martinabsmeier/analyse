@@ -106,4 +106,8 @@ public class FileUtils {
             return Collections.emptyList();
         }
     }
+
+    private FileUtils() {
+        // We do not want an instance
+    }
 }

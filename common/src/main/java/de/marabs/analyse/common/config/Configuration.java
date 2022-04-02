@@ -38,7 +38,7 @@ public class Configuration {
     private static final String COMMON_DEFINITION_TEST = "testConfigDefinition.xml";
 
     @Getter
-    private CombinedConfiguration configuration;
+    private CombinedConfiguration config;
 
     @Builder
     public Configuration(boolean isTestConfiguration) {
@@ -55,9 +55,9 @@ public class Configuration {
 
     // #################################################################################################################
     private void initConfiguration(String configDefinition) throws ConfigurationException {
-        Parameters params = new Parameters();
-        CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder();
+        var params = new Parameters();
+        var builder = new CombinedConfigurationBuilder();
         builder.configure(params.fileBased().setFile(new File(configDefinition)));
-        configuration = builder.getConfiguration();
+        config = builder.getConfiguration();
     }
 }

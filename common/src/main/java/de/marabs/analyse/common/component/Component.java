@@ -40,6 +40,8 @@ import static java.util.Objects.*;
 public class Component implements Serializable {
     private static final long serialVersionUID = 8508603552627381045L;
 
+    public static final String IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE = "NULL is not permitted as value for parameter 'type'.";
+
     private Component parent;
     private ComponentType type;
     private String value;
@@ -92,7 +94,7 @@ public class Component implements Serializable {
      * @return list with all children matching the type or an empty list if no child matches
      */
     public List<Component> findChildrenByType(ComponentType type) {
-        requireNonNull(type, "NULL is not permitted as value for parameter 'type'.");
+        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
         return getChildren().stream()
             .filter(child -> child.isType(type))
             .collect(Collectors.toList());
@@ -139,7 +141,7 @@ public class Component implements Serializable {
      * @return list with all component attributes matching the type or an empty list if no one matches
      */
     public List<ComponentAttribute> findAttributesByType(ComponentAttributeType type) {
-        requireNonNull(type, "NULL is not permitted as value for parameter 'type'.");
+        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
         return getAttributes().stream()
             .filter(attribute -> type.equals(attribute.getType()))
             .collect(Collectors.toList());
@@ -163,7 +165,7 @@ public class Component implements Serializable {
      * @return the parent or NULL if no one is found
      */
     public Component findParentByType(ComponentType type) {
-        requireNonNull(type, "NULL is not permitted as value for parameter 'type'.");
+        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
         return findParentByType(this, type);
     }
 
@@ -211,7 +213,7 @@ public class Component implements Serializable {
      * @return true if this component is of the specified type, false otherwise
      */
     public boolean isType(ComponentType type) {
-        requireNonNull(type, "NULL is not permitted as value for parameter 'type'.");
+        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
         return type.equals(getType());
     }
 
