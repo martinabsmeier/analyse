@@ -178,9 +178,9 @@ public class Component implements Serializable {
         List<Component> parents = new ArrayList<>();
 
         if (hasParentAndParentIsNotRoot()) {
-            Component parent = getParent();
-            parents.add(parent);
-            parents.addAll(parent.getParents());
+            Component parentComponent = getParent();
+            parents.add(parentComponent);
+            parents.addAll(parentComponent.getParents());
         }
 
         return parents;
@@ -225,11 +225,11 @@ public class Component implements Serializable {
     // #################################################################################################################
     private Component findParentByType(Component component, ComponentType type) {
         if (component.hasParentAndParentIsNotRoot()) {
-            Component parent = component.getParent();
-            if (parent.isType(type)) {
-                return parent;
+            Component parentComponent = component.getParent();
+            if (parentComponent.isType(type)) {
+                return parentComponent;
             }
-            return findParentByType(parent, type);
+            return findParentByType(parentComponent, type);
         }
         return null;
     }

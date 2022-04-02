@@ -19,6 +19,7 @@ import de.marabs.analyse.common.config.Configuration;
 import org.apache.commons.configuration2.CombinedConfiguration;
 
 /**
+ * FIXME Add description
  *
  * @author Martin Absmeier
  */
@@ -27,4 +28,8 @@ class CommonConstants {
 
     public static final String SEPARATOR = CONFIG.get(String.class, "separator");
 
+    // #################################################################################################################
+    private CommonConstants() {
+        // We do not want an instance
+    }
 }
