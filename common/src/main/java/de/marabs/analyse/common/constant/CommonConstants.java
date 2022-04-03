@@ -31,10 +31,10 @@ import static java.io.File.separator;
  * @author Martin Absmeier
  */
 class CommonConstants {
-    private static final CombinedConfiguration CONFIG = Configuration.builder().isTestConfiguration(false).build().getConfig();
+    protected static final CombinedConfiguration CONFIG = Configuration.builder().isTestConfiguration(false).build().getConfig();
 
     public static final String EMPTY_STRING = "";
-    public static final String SEPARATOR = "--------------------------------------------------------------------------------";
+    public static final String SEPARATOR = CONFIG.get(String.class, "separator");
     public static final Charset UTF_8 = StandardCharsets.UTF_8;
     public static final String USER_DIR = System.getProperty("user.dir");
     public static final String USER_HOME_DIR = System.getProperty("user.home");

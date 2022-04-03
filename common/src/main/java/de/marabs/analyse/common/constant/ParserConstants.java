@@ -22,7 +22,7 @@ package de.marabs.analyse.common.constant;
  */
 public class ParserConstants extends CommonConstants {
 
-    public static final String UNIQUE_DELIMITER = ".";
+    public static final String UNIQUE_DELIMITER = CONFIG.get(String.class, "uniqueDelimiter");
     public static final String DELIMITER_REGEX = "[.]";
 
     // #################################################################################################################
