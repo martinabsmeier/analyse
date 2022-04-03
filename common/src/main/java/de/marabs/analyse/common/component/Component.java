@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.marabs.analyse.common.constant.ParserConstants.UNIQUE_DELIMITER;
 import static java.util.Objects.*;
 
 /**
@@ -215,6 +216,23 @@ public class Component implements Serializable {
     public boolean isType(ComponentType type) {
         requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
         return type.equals(getType());
+    }
+
+    /**
+     * eturn the unique coordinate of this {@link Component}.
+     *
+     * @return the unique coordinate
+     */
+    public String getUniqueCoordinate() {
+        String uniqueCoordinate = getValue();
+
+        if (hasParentAndParentIsNotRoot()) {
+            return getParent().getUniqueCoordinate()
+                .concat(UNIQUE_DELIMITER)
+                .concat(uniqueCoordinate);
+        }
+
+        return uniqueCoordinate;
     }
 
     @Override
