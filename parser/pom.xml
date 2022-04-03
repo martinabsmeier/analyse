@@ -89,7 +89,7 @@
                 </executions>
                 <configuration>
                     <libDirectory>src/main/antlr4</libDirectory>
-                    <listener>false</listener>
+                    <listener>true</listener>
                     <visitor>true</visitor>
                 </configuration>
             </plugin>
