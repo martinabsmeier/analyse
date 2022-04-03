@@ -16,12 +16,17 @@
 package de.marabs.analyse.common.constant;
 
 /**
- * {@code ParserConstants} contains the common constants of module {@code SAParser}.
+ * {@code ParserConstants} contains the common constants of module {@code parser}.
  *
  * @author Martin Absmeier
  */
-public class ParserConstants {
+public class ParserConstants extends CommonConstants {
 
     public static final String UNIQUE_DELIMITER = ".";
     public static final String DELIMITER_REGEX = "[.]";
+
+    // #################################################################################################################
+    private ParserConstants() {
+        // We do not want an instance
+    }
 }

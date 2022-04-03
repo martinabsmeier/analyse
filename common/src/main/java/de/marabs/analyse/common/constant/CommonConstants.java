@@ -18,18 +18,30 @@ package de.marabs.analyse.common.constant;
 import de.marabs.analyse.common.config.Configuration;
 import org.apache.commons.configuration2.CombinedConfiguration;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+import static java.io.File.separator;
+
 /**
- * FIXME Add description
+ * {@code CommonConstants} contains general constants and is the superclass of all classes containing constants.<br>
+ * <b>NOTE:</b><br>
+ * Other constant classes must be derived from this one.
  *
  * @author Martin Absmeier
  */
 class CommonConstants {
     private static final CombinedConfiguration CONFIG = Configuration.builder().isTestConfiguration(false).build().getConfig();
 
-    public static final String SEPARATOR = CONFIG.get(String.class, "separator");
+    public static final String EMPTY_STRING = "";
+    public static final String SEPARATOR = "--------------------------------------------------------------------------------";
+    public static final Charset UTF_8 = StandardCharsets.UTF_8;
+    public static final String USER_DIR = System.getProperty("user.dir");
+    public static final String USER_HOME_DIR = System.getProperty("user.home");
+    public static final String TARGET_DIR = USER_DIR + separator + "target" + separator;
 
     // #################################################################################################################
-    private CommonConstants() {
+    protected CommonConstants() {
         // We do not want an instance
     }
 }
