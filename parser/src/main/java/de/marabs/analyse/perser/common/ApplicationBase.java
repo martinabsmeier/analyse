@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.marabs.analyse.common;
+package de.marabs.analyse.perser.common;
 
 import de.marabs.analyse.common.component.Component;
 import de.marabs.analyse.common.component.filter.ComponentFilter;
+import de.marabs.analyse.common.constant.ParserConstants;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
+import static de.marabs.analyse.common.constant.ParserConstants.UNIQUE_DELIMITER;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
@@ -61,8 +63,9 @@ public abstract class ApplicationBase {
     // #################################################################################################################
 
     /**
-     * Return the language specific fully qualified name of the specified {@code component} as defined in the
-     * language specification. The default implementation adds up all component names up the tree separated with a dot
+     * Return the language specific fully qualified name of the specified {@code component} as defined in the language
+     * specification. The default implementation goes up the tree and concatenates all values of the components in the
+     * tree, separating them with a {@link ParserConstants#UNIQUE_DELIMITER}.
      *
      * @param component the component (e.g. source class or method, etc.)
      * @return the unique coordinate
@@ -72,8 +75,7 @@ public abstract class ApplicationBase {
 
         String qualifiedName = component.getValue();
         if (component.hasParentAndParentIsNotRoot()) {
-            String separator = ".";
-            qualifiedName = getQualifiedName(component.getParent()).concat(separator).concat(qualifiedName);
+            qualifiedName = getQualifiedName(component.getParent()).concat(UNIQUE_DELIMITER).concat(qualifiedName);
         }
 
         return qualifiedName;
@@ -109,7 +111,7 @@ public abstract class ApplicationBase {
      * @param uniqueCoordinate the unique coordinate of the component
      * @return the component or NULL if no one is found
      */
-    public Component findComponentByUniqueCoordinate(String uniqueCoordinate) {
+    public Component findChildByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, "NULL is not permitted as a value of parameter 'uniqueCoordinate'.");
 
         Component component = findApplicationComponentByUniqueCoordinate(uniqueCoordinate);
@@ -129,7 +131,7 @@ public abstract class ApplicationBase {
      */
     public Component findApplicationComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, "NULL is not permitted as a value of parameter 'uniqueCoordinate'.");
-        return findComponentByUniqueCoordinate(components, uniqueCoordinate);
+        return findChildByUniqueCoordinate(components, uniqueCoordinate);
     }
 
     /**
@@ -143,7 +145,7 @@ public abstract class ApplicationBase {
         requireNonNull(uniqueCoordinate, "NULL is not permitted as a value of parameter 'uniqueCoordinate'.");
 
         return libraries.stream()
-            .map(library -> findComponentByUniqueCoordinate(library, uniqueCoordinate))
+            .map(library -> findChildByUniqueCoordinate(library, uniqueCoordinate))
             .findFirst().orElse(null);
     }
 
@@ -163,7 +165,6 @@ public abstract class ApplicationBase {
         if (filter.apply(component)) {
             resultList.add(component);
         }
-
         if (visitParents && component.hasParentAndParentIsNotRoot()) {
             resultList.addAll(findComponentAndApplyFilter(component.getParent(), filter, true));
         }
@@ -193,27 +194,18 @@ public abstract class ApplicationBase {
     }
 
     /**
-     * Retrieves child component of {@code component} specified by {@code uniqueCoordinate}.
+     * Retrieves the child component of the specified {@code component} for the specified {@code uniqueCoordinate}.
      *
      * @param component        the component
      * @param uniqueCoordinate the unique coordinate of the component
-     * @return the component or [NULL] if no one is found
+     * @return the component or NULL if no one is found
      */
-    private Component findComponentByUniqueCoordinate(Component component, String uniqueCoordinate) {
-        return null;
-        /* FIXME implement
-        if (uniqueCoordinate.contains(UNIQUE_DELIMITER)) {
-            String[] values = uniqueCoordinate.split(DELIMITER_REGEX);
-            for (String value : values) {
-                component = component.findChildByValue(value);
-                if (isNull(component)) {
-                    return null;
-                }
-            }
-        } else {
-            component = component.findChildByValue(uniqueCoordinate);
-        }
-        return component;
-         */
+    private Component findChildByUniqueCoordinate(Component component, String uniqueCoordinate) {
+        requireNonNull(component, "NULL is not permitted as value for 'component' parameter.");
+        requireNonNull(uniqueCoordinate, "NULL is not permitted as value for 'uniqueCoordinate' parameter.");
+
+        return component.getChildren().stream()
+            .filter(child -> uniqueCoordinate.equals(child.getUniqueCoordinate()))
+            .findFirst().orElse(null);
     }
 }
