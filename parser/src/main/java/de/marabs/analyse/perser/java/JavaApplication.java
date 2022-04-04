@@ -35,7 +35,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class JavaApplication extends ApplicationBase {
 
-    private static JavaApplication INSTANCE;
+    private static JavaApplication instance;
 
     /**
      * Creates a new instance of {@code JavaApplication} if necessary and returns it.
@@ -44,10 +44,10 @@ public class JavaApplication extends ApplicationBase {
      */
     @Synchronized
     public static JavaApplication getInstance() {
-        if (isNull(INSTANCE)) {
-            INSTANCE = new JavaApplication();
+        if (isNull(instance)) {
+            instance = new JavaApplication();
         }
-        return INSTANCE;
+        return instance;
     }
 
     /**
