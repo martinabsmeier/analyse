@@ -114,7 +114,7 @@ public abstract class ApplicationBase {
     public Component findChildByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
-        Component component = findApplicationComponentByUniqueCoordinate(uniqueCoordinate);
+        var component = findApplicationComponentByUniqueCoordinate(uniqueCoordinate);
         if (isNull(component)) {
             component = findLibraryComponentByUniqueCoordinate(uniqueCoordinate);
         }
