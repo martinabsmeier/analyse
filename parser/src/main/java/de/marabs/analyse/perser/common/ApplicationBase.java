@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
-import static de.marabs.analyse.common.constant.ParserConstants.UNIQUE_DELIMITER;
+import static de.marabs.analyse.common.constant.ParserConstants.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
@@ -71,7 +71,7 @@ public abstract class ApplicationBase {
      * @return the unique coordinate
      */
     public String getQualifiedName(Component component) {
-        requireNonNull(component, "NULL is not permitted as a value for the 'component' parameter.");
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
 
         String qualifiedName = component.getValue();
         if (component.hasParentAndParentIsNotRoot()) {
@@ -88,7 +88,7 @@ public abstract class ApplicationBase {
      * @param component the component
      */
     public void mergeWithApplication(Component component) {
-        requireNonNull(component, "NULL is not permitted as a value for the 'component' parameter.");
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
         mergeComponent(component, components);
     }
 
@@ -112,7 +112,7 @@ public abstract class ApplicationBase {
      * @return the component or NULL if no one is found
      */
     public Component findChildByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, "NULL is not permitted as a value of parameter 'uniqueCoordinate'.");
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
         Component component = findApplicationComponentByUniqueCoordinate(uniqueCoordinate);
         if (isNull(component)) {
@@ -130,7 +130,7 @@ public abstract class ApplicationBase {
      * @return the component or NULL if no one is found
      */
     public Component findApplicationComponentByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, "NULL is not permitted as a value of parameter 'uniqueCoordinate'.");
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
         return findChildByUniqueCoordinate(components, uniqueCoordinate);
     }
 
@@ -142,7 +142,7 @@ public abstract class ApplicationBase {
      * @return the component or NULL if no one is found
      */
     public Component findLibraryComponentByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, "NULL is not permitted as a value of parameter 'uniqueCoordinate'.");
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
         return libraries.stream()
             .map(library -> findChildByUniqueCoordinate(library, uniqueCoordinate))
@@ -158,7 +158,7 @@ public abstract class ApplicationBase {
      * @return a list of components matching the criteria
      */
     public List<Component> findComponentAndApplyFilter(Component component, ComponentFilter filter, boolean visitParents) {
-        requireNonNull(component, "NULL is not permitted as value for 'component' parameter.");
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
         requireNonNull(filter, "NULL is not permitted as value for 'filter' parameter.");
 
         List<Component> resultList = new ArrayList<>();
@@ -201,8 +201,8 @@ public abstract class ApplicationBase {
      * @return the component or NULL if no one is found
      */
     private Component findChildByUniqueCoordinate(Component component, String uniqueCoordinate) {
-        requireNonNull(component, "NULL is not permitted as value for 'component' parameter.");
-        requireNonNull(uniqueCoordinate, "NULL is not permitted as value for 'uniqueCoordinate' parameter.");
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
         return component.getChildren().stream()
             .filter(child -> uniqueCoordinate.equals(child.getUniqueCoordinate()))

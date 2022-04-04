@@ -22,6 +22,9 @@ package de.marabs.analyse.common.constant;
  */
 public class ParserConstants extends CommonConstants {
 
+    public static final String NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM = "NULL is not permitted as a value for the 'component' parameter.";
+    public static final String NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM = "NULL is not permitted as a value for the 'uniqueCoordinate' parameter.";
+
     public static final String UNIQUE_DELIMITER = CONFIG.get(String.class, "uniqueDelimiter");
     public static final String DELIMITER_REGEX = "[.]";
 

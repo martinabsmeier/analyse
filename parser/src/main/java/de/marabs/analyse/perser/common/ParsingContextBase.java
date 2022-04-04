@@ -18,13 +18,14 @@ package de.marabs.analyse.perser.common;
 import de.marabs.analyse.common.component.Component;
 import de.marabs.analyse.common.component.ComponentAttribute;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
+import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM;
+import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -35,7 +36,6 @@ import static java.util.Objects.requireNonNull;
  * @author Martin Absmeier
  */
 @Data
-@NoArgsConstructor
 public abstract class ParsingContextBase {
 
     /**
@@ -86,7 +86,7 @@ public abstract class ParsingContextBase {
      * @param component the component
      */
     public void addVisibleComponent(Component component) {
-        requireNonNull(component, "NULL is not permitted as a value for the 'component' parameter.");
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
 
         if (!visibleComponents.contains(component)) {
             visibleComponents.add(component);
@@ -99,7 +99,7 @@ public abstract class ParsingContextBase {
      * @param component the component
      */
     public void addComponentWithVisibleChildren(Component component) {
-        requireNonNull(component, "NULL is not permitted as a value for the 'component' parameter.");
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
 
         if (!componentsWithVisibleChildren.contains(component)) {
             componentsWithVisibleChildren.add(component);
@@ -113,10 +113,10 @@ public abstract class ParsingContextBase {
      * @return the visible components or an empty list if no one matches the unique coordinate
      */
     public List<Component> findVisibleComponentsByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, "NULL is not permitted as a value for the 'uniqueCoordinate' parameter.");
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
         return visibleComponents.stream()
-            .filter(component -> uniqueCoordinate.equals(component.getUniqueCoordinate()))
+            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
             .collect(Collectors.toList());
     }
 
@@ -127,12 +127,12 @@ public abstract class ParsingContextBase {
      * @return the components with visible children or an empty list if no one matches the unique coordinate
      */
     public List<Component> findComponentsWithVisibleChildrenByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, "NULL is not permitted as a value for the 'uniqueCoordinate' parameter.");
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
         return componentsWithVisibleChildren.stream()
             .map(Component::getChildren)
             .flatMap(List::stream)
-            .filter(component -> uniqueCoordinate.equals(component.getUniqueCoordinate()))
+            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
             .collect(Collectors.toList());
     }
 
@@ -158,6 +158,10 @@ public abstract class ParsingContextBase {
     public String toString() {
         String fileName = isNull(currentFile) ? "" : currentFile.getValue();
         String uniqueCoordinate = isNull(currentComponent) ? "" : currentComponent.getUniqueCoordinate();
-        return format("File: {0} | Unique coordinate of current component: {1}", fileName, uniqueCoordinate);
+        return format("File: %s | Unique coordinate of current component: %s", fileName, uniqueCoordinate);
+    }
+
+    // #################################################################################################################
+    protected ParsingContextBase() {
     }
 }
