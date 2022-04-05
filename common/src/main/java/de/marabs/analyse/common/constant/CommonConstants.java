@@ -30,7 +30,7 @@ import static java.io.File.separator;
  *
  * @author Martin Absmeier
  */
-class CommonConstants {
+public class CommonConstants {
     protected static final CombinedConfiguration CONFIG = Configuration.builder().isTestConfiguration(false).build().getConfig();
 
     public static final String EMPTY_STRING = "";
@@ -39,6 +39,12 @@ class CommonConstants {
     public static final String USER_DIR = System.getProperty("user.dir");
     public static final String USER_HOME_DIR = System.getProperty("user.home");
     public static final String TARGET_DIR = USER_DIR + separator + "target" + separator;
+
+    // #################################################################################################################
+
+    public static final String NULL_NOT_PERMITTED_AS_VALUE_TYPE = "NULL is not permitted as value for parameter 'type'.";
+    public static final String NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM = "NULL is not permitted as a value for the 'component' parameter.";
+    public static final String NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM = "NULL is not permitted as a value for the 'uniqueCoordinate' parameter.";
 
     // #################################################################################################################
     protected CommonConstants() {

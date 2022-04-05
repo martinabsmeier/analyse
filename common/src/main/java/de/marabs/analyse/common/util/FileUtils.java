@@ -40,22 +40,21 @@ public class FileUtils {
      * Retrieve all files from the specified {@code directory} matching the {@code extension}.
      *
      * @param directory  the directory to be parsed
-     * @param extensions the extension of the file (e.g. 'java')
+     * @param extension the extension of the file (e.g. 'java')
      * @return list with the found files
      * @throws IllegalArgumentException is thrown if parameter {@code directory} is not a directory
      */
-    public static List<File> findFiles(File directory, List<String> extensions) throws IllegalArgumentException {
-        requireNonNull(directory, "NULL is not permitted as value for parameter 'directory'.");
-        requireNonNull(extensions, "NULL is not permitted as value for parameter 'extensions'.");
-
-        if (!directory.isDirectory()) {
-            throw new IllegalArgumentException("Please specify a directory. '" + directory.getName() + "' is not a directory.");
+    public static List<File> findFiles(File directory, String extension) {
+        try (Stream<Path> paths = Files.walk(Paths.get(directory.getPath()))) {
+            return paths
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().toLowerCase().endsWith(extension))
+                .map(Path::toFile)
+                .collect(Collectors.toList());
+        } catch (IOException ex) {
+            LOGGER.warn("Could not read file from '{}' with extension '{}' due to: '{}'", directory, extension, ex.getMessage());
+            return Collections.emptyList();
         }
-
-        return extensions.stream()
-            .map(ext -> findFiles(directory, ext))
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
     }
 
     /**
@@ -94,18 +93,6 @@ public class FileUtils {
     }
 
     // #################################################################################################################
-    private static List<File> findFiles(File directory, String extension) {
-        try (Stream<Path> paths = Files.walk(Paths.get(directory.getPath()))) {
-            return paths
-                .filter(Files::isRegularFile)
-                .filter(path -> path.toString().toLowerCase().endsWith(extension))
-                .map(Path::toFile)
-                .collect(Collectors.toList());
-        } catch (IOException ex) {
-            LOGGER.warn("Could not read file from '{}' with extension '{}' due to: '{}'", directory, extension, ex.getMessage());
-            return Collections.emptyList();
-        }
-    }
 
     private FileUtils() {
         // We do not want an instance

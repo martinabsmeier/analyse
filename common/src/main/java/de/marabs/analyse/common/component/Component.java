@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.marabs.analyse.common.constant.CommonConstants.NULL_NOT_PERMITTED_AS_VALUE_TYPE;
 import static de.marabs.analyse.common.constant.ParserConstants.UNIQUE_DELIMITER;
 import static java.util.Objects.*;
 
@@ -40,8 +41,6 @@ import static java.util.Objects.*;
 @EqualsAndHashCode
 public class Component implements Serializable {
     private static final long serialVersionUID = 8508603552627381045L;
-
-    public static final String IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE = "NULL is not permitted as value for parameter 'type'.";
 
     private Component parent;
     private ComponentType type;
@@ -95,7 +94,7 @@ public class Component implements Serializable {
      * @return list with all children matching the type or an empty list if no child matches
      */
     public List<Component> findChildrenByType(ComponentType type) {
-        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
+        requireNonNull(type, NULL_NOT_PERMITTED_AS_VALUE_TYPE);
         return getChildren().stream()
             .filter(child -> child.isType(type))
             .collect(Collectors.toList());
@@ -123,6 +122,16 @@ public class Component implements Serializable {
         return !children.isEmpty();
     }
 
+    /**
+     * Checks whether the {@link Component} knows a child specified by {@code component} or not.
+     *
+     * @param component the child component
+     * @return true if the component does not know the child, otherwise false
+     */
+    public boolean childrenNotContains(Component component) {
+        return !children.contains(component);
+    }
+
     // #################################################################################################################
 
     /**
@@ -142,7 +151,7 @@ public class Component implements Serializable {
      * @return list with all component attributes matching the type or an empty list if no one matches
      */
     public List<ComponentAttribute> findAttributesByType(ComponentAttributeType type) {
-        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
+        requireNonNull(type, NULL_NOT_PERMITTED_AS_VALUE_TYPE);
         return getAttributes().stream()
             .filter(attribute -> type.equals(attribute.getType()))
             .collect(Collectors.toList());
@@ -157,6 +166,24 @@ public class Component implements Serializable {
         return !attributes.isEmpty();
     }
 
+    /**
+     * Checks if this component has an attribute with the specified {@code type} and {@code value}.
+     *
+     * @param type  the type of the attribute
+     * @param value the value of the attribute
+     * @return true if the component has an attribute with specified type and value, false otherwise
+     */
+    public boolean hasAttributeWithTypeAndValue(ComponentAttributeType type, String value) {
+        requireNonNull(type, NULL_NOT_PERMITTED_AS_VALUE_TYPE);
+        requireNonNull(value, "NULL is not permitted as value for 'value' parameter.");
+
+        ComponentAttribute attByTypeAndValue = findAttributesByType(type).stream()
+            .filter(att -> value.equals(att.getValue()))
+            .findFirst().orElse(null);
+
+        return nonNull(attByTypeAndValue);
+    }
+
     // #################################################################################################################
 
     /**
@@ -166,7 +193,7 @@ public class Component implements Serializable {
      * @return the parent or NULL if no one is found
      */
     public Component findParentByType(ComponentType type) {
-        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
+        requireNonNull(type, NULL_NOT_PERMITTED_AS_VALUE_TYPE);
         return findParentByType(this, type);
     }
 
@@ -214,7 +241,7 @@ public class Component implements Serializable {
      * @return true if this component is of the specified type, false otherwise
      */
     public boolean isType(ComponentType type) {
-        requireNonNull(type, IS_NOT_PERMITTED_AS_VALUE_FOR_PARAMETER_TYPE);
+        requireNonNull(type, NULL_NOT_PERMITTED_AS_VALUE_TYPE);
         return type.equals(getType());
     }
 
