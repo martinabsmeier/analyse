@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.marabs.analyse.perser.common;
-
-import lombok.Builder;
-import lombok.Data;
-import org.antlr.v4.runtime.tree.ParseTree;
+package de.marabs.analyse.perser;
 
 /**
- * {@code ParserResult} is a language independent result of source code parsing.
+ * Enumeration of the source code types.
  *
  * @author Martin Absmeier
  */
-@Data
-@Builder
-public class ParserResult {
-
-    private ParseTree parseTree;
-    private String sourceName;
-
+public enum SourceType {
+    JAVA,
+    SCALA
 }

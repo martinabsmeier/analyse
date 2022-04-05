@@ -17,14 +17,14 @@ package de.marabs.analyse.perser.common;
 
 import de.marabs.analyse.common.component.Component;
 import de.marabs.analyse.common.component.filter.ComponentFilter;
-import de.marabs.analyse.common.constant.ParserConstants;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
-import static de.marabs.analyse.common.constant.ParserConstants.*;
+import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM;
+import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
@@ -54,18 +54,18 @@ public abstract class ApplicationBase {
     /**
      * Check if the specified {@code component} is visible from {@code visibleFrom} component.
      *
-     * @param component   the component for which the test is carried out
-     * @param visibleFrom the component from which the other is visible
+     * @param component         the component for which the test is carried out
+     * @param visibleFrom       the component from which the other is visible
+     * @param withinInheritance true if inheritance is to be taken into account, false otherwise
      * @return true if {@code component} is visible from {@code visibleFrom} component, false otherwise
      */
-    public abstract boolean isComponentVisible(Component component, Component visibleFrom);
+    public abstract boolean isComponentVisible(Component component, Component visibleFrom, boolean withinInheritance);
 
     // #################################################################################################################
 
     /**
-     * Return the language specific fully qualified name of the specified {@code component} as defined in the language
-     * specification. The default implementation goes up the tree and concatenates all values of the components in the
-     * tree, separating them with a {@link ParserConstants#UNIQUE_DELIMITER}.
+     * Return the language specific fully qualified name of the specified {@code component} as defined in the
+     * language specification. The default implementation adds up all component names up the tree separated with a dot
      *
      * @param component the component (e.g. source class or method, etc.)
      * @return the unique coordinate
@@ -73,12 +73,14 @@ public abstract class ApplicationBase {
     public String getQualifiedName(Component component) {
         requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
 
-        String qualifiedName = component.getValue();
+        String resultString = component.getValue();
+
         if (component.hasParentAndParentIsNotRoot()) {
-            qualifiedName = getQualifiedName(component.getParent()).concat(UNIQUE_DELIMITER).concat(qualifiedName);
+            String separator = ".";
+            resultString = getQualifiedName(component.getParent()).concat(separator).concat(resultString);
         }
 
-        return qualifiedName;
+        return resultString;
     }
 
     /**
@@ -111,14 +113,13 @@ public abstract class ApplicationBase {
      * @param uniqueCoordinate the unique coordinate of the component
      * @return the component or NULL if no one is found
      */
-    public Component findChildByUniqueCoordinate(String uniqueCoordinate) {
+    public Component findComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
-        var component = findApplicationComponentByUniqueCoordinate(uniqueCoordinate);
+        Component component = findApplicationComponentByUniqueCoordinate(uniqueCoordinate);
         if (isNull(component)) {
             component = findLibraryComponentByUniqueCoordinate(uniqueCoordinate);
         }
-
         return component;
     }
 
@@ -131,7 +132,7 @@ public abstract class ApplicationBase {
      */
     public Component findApplicationComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-        return findChildByUniqueCoordinate(components, uniqueCoordinate);
+        return findComponentByUniqueCoordinate(components, uniqueCoordinate);
     }
 
     /**
@@ -144,20 +145,18 @@ public abstract class ApplicationBase {
     public Component findLibraryComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
 
-        return libraries.stream()
-            .map(library -> findChildByUniqueCoordinate(library, uniqueCoordinate))
-            .findFirst().orElse(null);
+        return libraries.stream().map(library -> findComponentByUniqueCoordinate(library, uniqueCoordinate)).findFirst().orElse(null);
     }
 
     /**
-     * Apply the filter to the component and follow the parent objects if {@code visitParents} is set to true.
+     * There is a generic need to walk up the tree hierarchy and collect specific other components in a flexible way.
      *
      * @param component    component to start the search from
-     * @param visitParents should we walk directly up the tree, i.e. visit the parents recursively?
      * @param filter       filter to all components whether they are relevant or not
+     * @param visitParents should we walk directly up the tree and visit parents
      * @return a list of components matching the criteria
      */
-    public List<Component> findComponentAndApplyFilter(Component component, ComponentFilter filter, boolean visitParents) {
+    public List<Component> findUpwardsAndFilter(Component component, ComponentFilter filter, boolean visitParents) {
         requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
         requireNonNull(filter, "NULL is not permitted as value for 'filter' parameter.");
 
@@ -165,12 +164,31 @@ public abstract class ApplicationBase {
         if (filter.apply(component)) {
             resultList.add(component);
         }
+
         if (visitParents && component.hasParentAndParentIsNotRoot()) {
-            resultList.addAll(findComponentAndApplyFilter(component.getParent(), filter, true));
+            resultList.addAll(findUpwardsAndFilter(component.getParent(), filter, true));
         }
 
         return resultList;
     }
+
+    /*
+     * Creates a new instance of {@link GraphEntity} specified by {@code component}.
+     *
+     * @param type      the type of graph
+     * @param component the component
+     * @return the created graph entity
+    public GraphEntity createGraphOfComponent(GraphType type, Component component) {
+        String qualifiedName = getQualifiedName(component);
+        GraphEntity graph = GraphEntity.builder().type(type).name(qualifiedName).checksum(component.getChecksum()).build();
+        graph.addAttribute("uniqueCoordinate", component.getUniqueCoordinate());
+        graph.addAttribute("qualifiedName", qualifiedName);
+
+        component.setGraphId(graph.getId());
+
+        return graph;
+    }
+    */
 
     // #################################################################################################################
 
@@ -183,29 +201,27 @@ public abstract class ApplicationBase {
     private void mergeComponent(Component component, Component pointer) {
         updateComponent(component, pointer);
 
-        component.getChildren().forEach(child -> {
+        List<Component> children = component.getChildren();
+        children.forEach(child -> {
             Component newPointer = pointer.findChild(child);
             if (isNull(newPointer)) {
                 pointer.addChild(child);
             } else {
+                // There can be more than one method or constructor with the same value let's add them
                 mergeComponent(child, newPointer);
             }
         });
     }
 
     /**
-     * Retrieves the child component of the specified {@code component} for the specified {@code uniqueCoordinate}.
+     * Retrieves child component of {@code component} specified by {@code coordinate}.
      *
      * @param component        the component
      * @param uniqueCoordinate the unique coordinate of the component
-     * @return the component or NULL if no one is found
+     * @return the component or [NULL] if no one is found
      */
-    private Component findChildByUniqueCoordinate(Component component, String uniqueCoordinate) {
-        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
-        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-
-        return component.getChildren().stream()
-            .filter(child -> uniqueCoordinate.equals(child.getUniqueCoordinate()))
-            .findFirst().orElse(null);
+    private Component findComponentByUniqueCoordinate(Component component, String uniqueCoordinate) {
+        // FIXME Implement
+        return null;
     }
 }

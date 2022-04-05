@@ -13,22 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.marabs.analyse.perser.common;
+package de.marabs.analyse.perser.common.library;
 
+import de.marabs.analyse.common.component.Component;
+import de.marabs.analyse.common.component.type.ComponentType;
 import lombok.Builder;
-import lombok.Data;
-import org.antlr.v4.runtime.tree.ParseTree;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * {@code ParserResult} is a language independent result of source code parsing.
+ * {@code Library} represents an entry of a library.
  *
  * @author Martin Absmeier
  */
-@Data
 @Builder
-public class ParserResult {
+public class Library {
 
-    private ParseTree parseTree;
-    private String sourceName;
+    @Getter
+    private final String groupId;
+    @Getter
+    private final String artifactId;
+    @Getter
+    private final String version;
+    @Getter
+    private String revisionId;
+    @Getter @Setter
+    private ComponentType type;
+    @Getter @Setter
+    private Component library;
 
 }

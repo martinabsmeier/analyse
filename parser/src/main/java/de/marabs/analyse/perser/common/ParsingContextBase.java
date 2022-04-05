@@ -18,24 +18,23 @@ package de.marabs.analyse.perser.common;
 import de.marabs.analyse.common.component.Component;
 import de.marabs.analyse.common.component.ComponentAttribute;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
-import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM;
-import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM;
-import static java.lang.String.format;
+import static java.text.MessageFormat.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 /**
- * {@code ParsingContextBase} is base class of all parsing contexts and holds the common information during the parsing process.
+ * {@code ParsingContextBase} is the base class of all parsing contexts and holds the common information during the parsing process.
  *
  * @author Martin Absmeier
  */
 @Data
+@NoArgsConstructor
 public abstract class ParsingContextBase {
 
     /**
@@ -54,7 +53,7 @@ public abstract class ParsingContextBase {
     private ComponentAttribute currentFile;
 
     /**
-     * Unique id of the source code e.g git commit id, it is used to compare source code versions.
+     * Unique id of the source code e.g git commit id, it is used to compare source code.
      */
     private String revisionId;
 
@@ -69,8 +68,33 @@ public abstract class ParsingContextBase {
      */
     protected List<Component> componentsWithVisibleChildren = new ArrayList<>();
 
-    // #################################################################################################################
 
+    /*
+    public List<UniqueComponentWrapper> getVisibleComponentsForValue(String value) {
+        return visibleComponents.stream()
+            .filter(component -> value.equals(component.getValue()))
+            .map(UniqueComponentWrapper::new)
+            .collect(Collectors.toList());
+    }
+
+    public List<UniqueComponentWrapper> getComponentsWithVisibleChildrenForValue(String value) {
+        return componentsWithVisibleChildren.stream()
+            .map(Component::getChildren)
+            .flatMap(List::stream)
+            .filter(component -> value.equals(component.getValue()))
+            .map(UniqueComponentWrapper::new)
+            .collect(Collectors.toList());
+    }
+     */
+
+
+    /**
+     * In some languages we rebuild the visible components when we enter new scope (e.g. sql) so we need to be able to clear this
+     */
+    public void clearVisibleComponents() {
+        visibleComponents.clear();
+        componentsWithVisibleChildren.clear();
+    }
     /**
      * Creates a new instance with the specified {@code revisionId}.
      *
@@ -81,74 +105,10 @@ public abstract class ParsingContextBase {
     }
 
     /**
-     * Add the specified {@code component} to the list of visible components if it is not already there.
-     *
-     * @param component the component
-     */
-    public void addVisibleComponent(Component component) {
-        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
-
-        if (!visibleComponents.contains(component)) {
-            visibleComponents.add(component);
-        }
-    }
-
-    /**
-     * Add the specified {@code component} to the list of components with visible children if it is not already there.
-     *
-     * @param component the component
-     */
-    public void addComponentWithVisibleChildren(Component component) {
-        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
-
-        if (!componentsWithVisibleChildren.contains(component)) {
-            componentsWithVisibleChildren.add(component);
-        }
-    }
-
-    /**
-     * From the visible components, finds all those with the specified {@code uniqueCoordinate}.
-     *
-     * @param uniqueCoordinate the unique coordinate of the searched components
-     * @return the visible components or an empty list if no one matches the unique coordinate
-     */
-    public List<Component> findVisibleComponentsByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-
-        return visibleComponents.stream()
-            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * From the components with visible children, finds all those with the specified {@code uniqueCoordinate}.
-     *
-     * @param uniqueCoordinate the unique coordinate of the searched components
-     * @return the components with visible children or an empty list if no one matches the unique coordinate
-     */
-    public List<Component> findComponentsWithVisibleChildrenByUniqueCoordinate(String uniqueCoordinate) {
-        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-
-        return componentsWithVisibleChildren.stream()
-            .map(Component::getChildren)
-            .flatMap(List::stream)
-            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * For some programming languages it is necessary to clear the visible components.
-     */
-    public void clearVisibleComponents() {
-        visibleComponents.clear();
-        componentsWithVisibleChildren.clear();
-    }
-
-    /**
      * Resets the parsing context so that the next listener can run.<br>
      * <b>It have to be called only from derived classes.</b>
      */
-    protected void reset() {
+    public void reset() {
         component = Component.builder().type(ROOT).value(ROOT.name()).build();
         currentComponent = component;
         currentFile = null;
@@ -156,12 +116,31 @@ public abstract class ParsingContextBase {
 
     @Override
     public String toString() {
-        String fileName = isNull(currentFile) ? "" : currentFile.getValue();
-        String uniqueCoordinate = isNull(currentComponent) ? "" : currentComponent.getUniqueCoordinate();
-        return format("File: %s | Unique coordinate of current component: %s", fileName, uniqueCoordinate);
+        String currentFileTxt = isNull(currentFile) ? "" : currentFile.getValue();
+        String currentComponentTxt = isNull(currentComponent) ? "" : currentComponent.getUniqueCoordinate();
+        return format("FILE: {0} | CURR-CMP: {1}", currentFileTxt, currentComponentTxt);
     }
 
-    // #################################################################################################################
-    protected ParsingContextBase() {
+    /**
+     * Add the visible component specified by {@code component} to the internal list if not contained.
+     *
+     * @param component the component
+     */
+    public void addVisibleComponentIfNotContained(Component component) {
+        requireNonNull(component, "NULL is not permitted for parameter 'component'.");
+
+        if (!visibleComponents.contains(component)) {
+            visibleComponents.add(component);
+        }
+    }
+
+    /**
+     * Add the visible children of the component specified by {@code component} to the internal list.
+     *
+     * @param component the component
+     */
+    public void addComponentWithVisibleChildren(Component component) {
+        requireNonNull(component, "NULL is not permitted for parameter 'component'.");
+        componentsWithVisibleChildren.add(component);
     }
 }
