@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -33,7 +32,7 @@ public class FileUtilsTest {
 
     @Test(expected = NullPointerException.class)
     public void findFilesDirectoryNull() {
-        FileUtils.findFiles(null, Collections.emptyList());
+        FileUtils.findFiles(null, "java");
     }
 
     @Test(expected = NullPointerException.class)
@@ -44,7 +43,7 @@ public class FileUtilsTest {
     @Test
     public void findFiles() {
         String path = System.getProperty("user.dir");
-        List<File> actual = FileUtils.findFiles(new File(path), List.of("java"));
+        List<File> actual = FileUtils.findFiles(new File(path), "java");
 
         assertNotNull("We expect a new created temp directory !", actual);
         assertFalse("We expect that there are files !", actual.isEmpty());
