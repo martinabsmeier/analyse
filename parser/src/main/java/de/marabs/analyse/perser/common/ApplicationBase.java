@@ -144,8 +144,10 @@ public abstract class ApplicationBase {
      */
     public Component findLibraryComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-
-        return libraries.stream().map(library -> findComponentByUniqueCoordinate(library, uniqueCoordinate)).findFirst().orElse(null);
+        return libraries.stream()
+            .map(library -> findComponentByUniqueCoordinate(library, uniqueCoordinate))
+            .findFirst()
+            .orElse(null);
     }
 
     /**
@@ -214,14 +216,19 @@ public abstract class ApplicationBase {
     }
 
     /**
-     * Retrieves child component of {@code component} specified by {@code coordinate}.
+     * Retrieves child component of {@code component} specified by {@code uniqueCoordinate}.
      *
      * @param component        the component
      * @param uniqueCoordinate the unique coordinate of the component
-     * @return the component or [NULL] if no one is found
+     * @return the component or NULL if no one is found
      */
     private Component findComponentByUniqueCoordinate(Component component, String uniqueCoordinate) {
-        // FIXME Implement
-        return null;
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
+        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
+
+        return component.getChildren().stream()
+            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
+            .findFirst()
+            .orElse(null);
     }
 }

@@ -268,7 +268,8 @@ public class Component implements Serializable {
 
     @Override
     public String toString() {
-        return isNull(type) ? "UNKNOWN".concat(" -> ").concat(getValue()) : type.name().concat(" -> ").concat(getValue());
+        String uniqueCoordinate = getUniqueCoordinate();
+        return isNull(uniqueCoordinate) ? "UC: -> unknown" : "UC: -> ".concat(uniqueCoordinate);
     }
 
     // #################################################################################################################

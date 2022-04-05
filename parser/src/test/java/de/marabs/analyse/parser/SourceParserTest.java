@@ -15,6 +15,7 @@
  */
 package de.marabs.analyse.parser;
 
+import de.marabs.analyse.common.component.Component;
 import de.marabs.analyse.perser.SourceParser;
 import de.marabs.analyse.perser.SourceType;
 import de.marabs.analyse.perser.common.ListenerBase;
@@ -63,6 +64,9 @@ public class SourceParserTest {
 
         JavaApplication application = JavaApplication.getInstance();
         assertNotNull("We expect an instance.", application);
+
+        Component components = application.getComponents();
+        assertNotNull("We expect components.", components);
     }
 
     // #################################################################################################################
