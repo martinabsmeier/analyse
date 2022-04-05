@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static de.marabs.analyse.common.component.type.ComponentAttributeType.*;
+import static de.marabs.analyse.common.component.type.ComponentAttributeType.SOURCE_NAME;
 import static de.marabs.analyse.common.component.type.ComponentType.*;
 import static de.marabs.analyse.common.constant.ParserConstants.*;
 import static de.marabs.analyse.parser.generated.java.JavaParser.*;
@@ -93,11 +94,8 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
     public void enterCompilationUnit(CompilationUnitContext ctx) {
         int startIdx = sourceName.lastIndexOf(separator) + 1;
         int stopIdx = sourceName.length();
-        parsingContext.setCurrentFile(createAttribute(ComponentAttributeType.SOURCE_NAME, sourceName.substring(startIdx, stopIdx)));
+        parsingContext.setCurrentFile(createAttribute(SOURCE_NAME, sourceName.substring(startIdx, stopIdx)));
     }
-
-    // #################################################################################################################
-    // Packages
 
     /**
      * A package declaration in a compilation unit specifies the fully qualified name of the package to which the
@@ -135,9 +133,6 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
             parsingContext.addComponentWithVisibleChildren(component);
         }
     }
-
-    // #################################################################################################################
-    // Imports
 
     /**
      * This rule covers all flavours of import statements including on demand (.*) and static imports.
@@ -699,10 +694,9 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
     }
 
     // #################################################################################################################
-    // Private methods
 
     private boolean isPublicOrProtectedOrPrivate(String modifier) {
-        return modifier.equals("public") || modifier.equals("protected") || modifier.equals("private");
+        return modifier.equals(JAVA_MODIFIER_PUBLIC) || modifier.equals(JAVA_MODIFIER_PROTECTED) || modifier.equals(JAVA_MODIFIER_PRIVATE);
     }
 
     private void addDefaultConstructorIfNecessary(Component component) {

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
 import static de.marabs.analyse.common.constant.CommonConstants.NULL_NOT_PERMITTED_AS_VALUE_TYPE;
 import static de.marabs.analyse.common.constant.ParserConstants.UNIQUE_DELIMITER;
 import static java.util.Objects.*;
@@ -46,6 +47,7 @@ public class Component implements Serializable {
     private ComponentType type;
     private String value;
     private List<ComponentAttribute> attributes;
+    @EqualsAndHashCode.Exclude
     private List<Component> children;
 
     /**
@@ -58,6 +60,8 @@ public class Component implements Serializable {
     public Component(ComponentType type, String value) {
         this.type = type;
         this.value = value;
+        this.attributes = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     // #################################################################################################################
@@ -206,9 +210,9 @@ public class Component implements Serializable {
         List<Component> parents = new ArrayList<>();
 
         if (hasParentAndParentIsNotRoot()) {
-            Component parentComponent = getParent();
-            parents.add(parentComponent);
-            parents.addAll(parentComponent.getParents());
+            Component parent = getParent();
+            parents.add(parent);
+            parents.addAll(parent.getParents());
         }
 
         return parents;
@@ -229,7 +233,7 @@ public class Component implements Serializable {
      * @return true if this component has a parent component and is not of type {@link ComponentType#ROOT}, false otherwise
      */
     public boolean hasParentAndParentIsNotRoot() {
-        return hasParent() && !getParent().isType(ComponentType.ROOT);
+        return hasParent() && !getParent().isType(ROOT);
     }
 
     // #################################################################################################################

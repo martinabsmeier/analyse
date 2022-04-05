@@ -32,6 +32,7 @@ public class ParserConstants extends CommonConstants {
 
     public static final String JAVA_MODIFIER_PUBLIC = "public";
     public static final String JAVA_MODIFIER_PROTECTED = "protected";
+    public static final String JAVA_MODIFIER_PRIVATE = "private";
     public static final String JAVA_MODIFIER_STATIC = "static";
     public static final String JAVA_MODIFIER_FINAL = "final";
 
