@@ -22,11 +22,24 @@ package de.marabs.analyse.common.constant;
  */
 public class ParserConstants extends CommonConstants {
 
-    public static final String NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM = "NULL is not permitted as a value for the 'component' parameter.";
-    public static final String NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM = "NULL is not permitted as a value for the 'uniqueCoordinate' parameter.";
-
     public static final String UNIQUE_DELIMITER = CONFIG.get(String.class, "uniqueDelimiter");
     public static final String DELIMITER_REGEX = "[.]";
+
+    // #################################################################################################################
+    public static final String JAVA_LANG_PACKAGE = "java.lang";
+    public static final String JAVA_IO_PACKAGE = "java.io";
+    public static final String JAVA_DEFAULT_PACKAGE_NAME = "default";
+
+    public static final String JAVA_MODIFIER_PUBLIC = "public";
+    public static final String JAVA_MODIFIER_PROTECTED = "protected";
+    public static final String JAVA_MODIFIER_STATIC = "static";
+    public static final String JAVA_MODIFIER_FINAL = "final";
+
+    public static final String JAVA_INSTANCE_INITIALIZER_NAME = "//instance_initializer";
+    public static final String JAVA_STATIC_INITIALIZER_NAME = "//static_initializer";
+
+    public static final String JAVA_ATT_KEY_METHOD_SIGNATURE = "method signature";
+    public static final String JAVA_ATT_KEY_CONTAINING_CLASS = "containing class";
 
     // #################################################################################################################
     private ParserConstants() {
