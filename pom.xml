@@ -6,9 +6,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.marabs.analyse</groupId>
-    <artifactId>src-analyse</artifactId>
+    <artifactId>analyse</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <name>analyse</name>
 
     <developers>
         <developer>
@@ -20,6 +22,7 @@
     <modules>
         <module>common</module>
         <module>parser</module>
+        <module>cli</module>
     </modules>
 
     <properties>
