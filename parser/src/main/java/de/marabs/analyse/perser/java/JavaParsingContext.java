@@ -50,7 +50,6 @@ public class JavaParsingContext extends ParsingContextBase {
      */
     private List<Component> imports = new ArrayList<>();
 
-
     /**
      * Creates a new instance with the specified {@code revisionId}.
      *
@@ -68,7 +67,7 @@ public class JavaParsingContext extends ParsingContextBase {
      * @return the component or NULL if no one is found
      */
     public Component findVisibleComponentByValue(String value) {
-        requireNonNull(value, "NULL is not permitted for parameter 'value'.");
+        requireNonNull(value, "NULL is not permitted as value for 'value' parameter.");
 
         Component component = visibleComponents.stream()
             .filter(cmp -> value.equals(cmp.getValue()))

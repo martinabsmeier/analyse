@@ -17,6 +17,8 @@ package de.marabs.analyse.perser.java.listener;
 
 import de.marabs.analyse.common.component.Component;
 import de.marabs.analyse.perser.java.JavaParsingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -34,6 +36,8 @@ import static java.util.Objects.nonNull;
  */
 public class JavaStructureListener extends JavaListenerBase {
 
+    private static final Logger LOGGER = LogManager.getLogger(JavaStructureListener.class);
+
     private static final String OBJECT_QUALIFIED = "java.lang.Object";
     private static final String OBJECT_CLASS = "c(java.lang.Object)";
     private static final String ENUM_QUALIFIED = "java.lang.Enum";
@@ -46,6 +50,34 @@ public class JavaStructureListener extends JavaListenerBase {
      */
     public JavaStructureListener(String revisionId) {
         super(new JavaParsingContext(revisionId));
+    }
+
+    @Override
+    public void enterPackageDeclaration(PackageDeclarationContext ctx) {
+        super.enterPackageDeclaration(ctx);
+
+        String uniqueCoordinate = parsingContext.getCurrentComponent().getUniqueCoordinate();
+        Component component = application.findComponentByUniqueCoordinate(uniqueCoordinate);
+        if (nonNull(component)) {
+            parsingContext.addComponentWithVisibleChildren(component);
+        }
+    }
+
+    @Override
+    public void enterImportDeclaration(ImportDeclarationContext ctx) {
+        super.enterImportDeclaration(ctx);
+
+        String importName = ctx.qualifiedName().getText();
+        Component component = application.findComponentByUniqueCoordinate(importName);
+        if (nonNull(component)) {
+            if (nonNull(ctx.MUL())) {
+                parsingContext.addComponentWithVisibleChildren(component);
+            } else {
+                parsingContext.addVisibleComponentIfNotContained(component);
+            }
+        } else {
+            LOGGER.warn("We have an unknown import '{}'.", importName);
+        }
     }
 
     // #################################################################################################################

@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
+import static de.marabs.analyse.common.constant.CommonConstants.EMPTY_STRING;
+import static de.marabs.analyse.common.constant.CommonConstants.NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -68,6 +70,36 @@ public abstract class ParsingContextBase {
      */
     protected List<Component> componentsWithVisibleChildren = new ArrayList<>();
 
+    /**
+     * Creates a new instance with the specified {@code revisionId}.
+     *
+     * @param revisionId Unique id of the source code e.g git commit id
+     */
+    public ParsingContextBase(String revisionId) {
+        this.revisionId = revisionId;
+    }
+
+    /**
+     * Add the visible component specified by {@code component} to the internal list if not contained.
+     *
+     * @param component the component
+     */
+    public void addVisibleComponentIfNotContained(Component component) {
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
+        if (!visibleComponents.contains(component)) {
+            visibleComponents.add(component);
+        }
+    }
+
+    /**
+     * Add the visible children of the component specified by {@code component} to the internal list.
+     *
+     * @param component the component
+     */
+    public void addComponentWithVisibleChildren(Component component) {
+        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
+        componentsWithVisibleChildren.add(component);
+    }
 
     /*
     public List<UniqueComponentWrapper> getVisibleComponentsForValue(String value) {
@@ -85,23 +117,14 @@ public abstract class ParsingContextBase {
             .map(UniqueComponentWrapper::new)
             .collect(Collectors.toList());
     }
-     */
-
+    */
 
     /**
-     * In some languages we rebuild the visible components when we enter new scope (e.g. sql) so we need to be able to clear this
+     * Some languages we clear the visible components when we enter new scope (e.g. sql).
      */
     public void clearVisibleComponents() {
         visibleComponents.clear();
         componentsWithVisibleChildren.clear();
-    }
-    /**
-     * Creates a new instance with the specified {@code revisionId}.
-     *
-     * @param revisionId Unique id of the source code e.g git commit id
-     */
-    public ParsingContextBase(String revisionId) {
-        this.revisionId = revisionId;
     }
 
     /**
@@ -116,31 +139,8 @@ public abstract class ParsingContextBase {
 
     @Override
     public String toString() {
-        String currentFileTxt = isNull(currentFile) ? "" : currentFile.getValue();
-        String currentComponentTxt = isNull(currentComponent) ? "" : currentComponent.getUniqueCoordinate();
+        String currentFileTxt = isNull(currentFile) ? EMPTY_STRING : currentFile.getValue();
+        String currentComponentTxt = isNull(currentComponent) ? EMPTY_STRING : currentComponent.getUniqueCoordinate();
         return format("FILE: {0} | CURR-CMP: {1}", currentFileTxt, currentComponentTxt);
-    }
-
-    /**
-     * Add the visible component specified by {@code component} to the internal list if not contained.
-     *
-     * @param component the component
-     */
-    public void addVisibleComponentIfNotContained(Component component) {
-        requireNonNull(component, "NULL is not permitted for parameter 'component'.");
-
-        if (!visibleComponents.contains(component)) {
-            visibleComponents.add(component);
-        }
-    }
-
-    /**
-     * Add the visible children of the component specified by {@code component} to the internal list.
-     *
-     * @param component the component
-     */
-    public void addComponentWithVisibleChildren(Component component) {
-        requireNonNull(component, "NULL is not permitted for parameter 'component'.");
-        componentsWithVisibleChildren.add(component);
     }
 }

@@ -21,6 +21,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.marabs.analyse.common.component.type.ComponentType.ROOT;
 import static de.marabs.analyse.common.constant.ParserConstants.NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM;
@@ -107,8 +108,9 @@ public abstract class ApplicationBase {
     }
 
     /**
-     * Retrieves the component specified by {@code value} from the application and libraries.<br>
-     * A coordinate is a string that uniquely identifies a component (e.g. java.lang.Integer).
+     * Searches for the component with the specified {@code uniqueCoordinate} in the application, if none is found, it
+     * is searched for in the libraries.<br>
+     * A uniqueCoordinate is a string that uniquely identifies a component (e.g. java.lang.Integer).
      *
      * @param uniqueCoordinate the unique coordinate of the component
      * @return the component or NULL if no one is found
@@ -120,45 +122,55 @@ public abstract class ApplicationBase {
         if (isNull(component)) {
             component = findLibraryComponentByUniqueCoordinate(uniqueCoordinate);
         }
+
         return component;
     }
 
     /**
-     * Retrieves the component specified by {@code value} from the application.<br>
-     * A coordinate is a string that uniquely identifies a component (e.g. java.lang.Integer).
+     * Retrieves the component specified by {@code uniqueCoordinate} from the application.<br>
+     * A uniqueCoordinate is a string that uniquely identifies a component (e.g. java.lang.Integer).
      *
      * @param uniqueCoordinate the unique coordinate of the component
      * @return the component or NULL if no one is found
      */
-    public Component findApplicationComponentByUniqueCoordinate(String uniqueCoordinate) {
+    private Component findApplicationComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-        return findComponentByUniqueCoordinate(components, uniqueCoordinate);
+
+        List<Component> allChildren = getAllChildren(components);
+        return allChildren.stream().parallel()
+            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
+            .findFirst()
+            .orElse(null);
     }
 
     /**
      * Retrieves the component specified by {@code uniqueCoordinate} from the libraries of the application.<br>
-     * A coordinate is a string that uniquely identifies a component (e.g. java.lang.Integer).
+     * A uniqueCoordinate is a string that uniquely identifies a component (e.g. java.lang.Integer).
      *
      * @param uniqueCoordinate the unique coordinate of the component
      * @return the component or NULL if no one is found
      */
     public Component findLibraryComponentByUniqueCoordinate(String uniqueCoordinate) {
         requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
-        return libraries.stream()
-            .map(library -> findComponentByUniqueCoordinate(library, uniqueCoordinate))
+
+        List<Component> allChildren = libraries.stream()
+            .map(cmp -> getAllChildren(cmp))
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+        return allChildren.stream().parallel()
+            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
             .findFirst()
             .orElse(null);
     }
 
     /**
-     * There is a generic need to walk up the tree hierarchy and collect specific other components in a flexible way.
+     * Retrieves all parents of the specified {@code component} that matches the specified {@code filter}.
      *
-     * @param component    component to start the search from
-     * @param filter       filter to all components whether they are relevant or not
-     * @param visitParents should we walk directly up the tree and visit parents
-     * @return a list of components matching the criteria
+     * @param component component to start the search from
+     * @param filter    filter to all components whether they are relevant or not
+     * @return list of parent components matching the filter or an empty list if no one matches
      */
-    public List<Component> findUpwardsAndFilter(Component component, ComponentFilter filter, boolean visitParents) {
+    public List<Component> findParentsByFilter(Component component, ComponentFilter filter) {
         requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
         requireNonNull(filter, "NULL is not permitted as value for 'filter' parameter.");
 
@@ -166,31 +178,12 @@ public abstract class ApplicationBase {
         if (filter.apply(component)) {
             resultList.add(component);
         }
-
-        if (visitParents && component.hasParentAndParentIsNotRoot()) {
-            resultList.addAll(findUpwardsAndFilter(component.getParent(), filter, true));
+        if (component.hasParentAndParentIsNotRoot()) {
+            resultList.addAll(findParentsByFilter(component.getParent(), filter));
         }
 
         return resultList;
     }
-
-    /*
-     * Creates a new instance of {@link GraphEntity} specified by {@code component}.
-     *
-     * @param type      the type of graph
-     * @param component the component
-     * @return the created graph entity
-    public GraphEntity createGraphOfComponent(GraphType type, Component component) {
-        String qualifiedName = getQualifiedName(component);
-        GraphEntity graph = GraphEntity.builder().type(type).name(qualifiedName).checksum(component.getChecksum()).build();
-        graph.addAttribute("uniqueCoordinate", component.getUniqueCoordinate());
-        graph.addAttribute("qualifiedName", qualifiedName);
-
-        component.setGraphId(graph.getId());
-
-        return graph;
-    }
-    */
 
     // #################################################################################################################
 
@@ -215,20 +208,18 @@ public abstract class ApplicationBase {
         });
     }
 
-    /**
-     * Retrieves child component of {@code component} specified by {@code uniqueCoordinate}.
-     *
-     * @param component        the component
-     * @param uniqueCoordinate the unique coordinate of the component
-     * @return the component or NULL if no one is found
-     */
-    private Component findComponentByUniqueCoordinate(Component component, String uniqueCoordinate) {
-        requireNonNull(component, NULL_NOT_PERMITTED_FOR_COMPONENT_PARAM);
-        requireNonNull(uniqueCoordinate, NULL_NOT_PERMITTED_FOR_UNIQUE_COORDINATE_PARAM);
+    private List<Component> getAllChildren(Component component) {
+        List<Component> allChildren = new ArrayList<>();
 
-        return component.getChildren().stream()
-            .filter(cmp -> uniqueCoordinate.equals(cmp.getUniqueCoordinate()))
-            .findFirst()
-            .orElse(null);
+        if (component.hasChildren()) {
+            List<Component> children = component.getChildren();
+            allChildren.addAll(children);
+
+            for (Component child : children) {
+                allChildren.addAll(getAllChildren(child));
+            }
+        }
+
+        return allChildren;
     }
 }

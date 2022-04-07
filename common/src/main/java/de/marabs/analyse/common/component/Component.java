@@ -43,9 +43,10 @@ import static java.util.Objects.*;
 public class Component implements Serializable {
     private static final long serialVersionUID = 8508603552627381045L;
 
-    private Component parent;
     private ComponentType type;
     private String value;
+    private Component parent;
+    @EqualsAndHashCode.Exclude
     private List<ComponentAttribute> attributes;
     @EqualsAndHashCode.Exclude
     private List<Component> children;
@@ -206,13 +207,13 @@ public class Component implements Serializable {
      *
      * @return all parents of this component or NULL if there are no parents
      */
-    public List<Component> getParents() {
+    public List<Component> getAllParents() {
         List<Component> parents = new ArrayList<>();
 
         if (hasParentAndParentIsNotRoot()) {
             Component parent = getParent();
             parents.add(parent);
-            parents.addAll(parent.getParents());
+            parents.addAll(parent.getAllParents());
         }
 
         return parents;
@@ -250,7 +251,7 @@ public class Component implements Serializable {
     }
 
     /**
-     * eturn the unique coordinate of this {@link Component}.
+     * Return the unique coordinate of this {@link Component}.
      *
      * @return the unique coordinate
      */

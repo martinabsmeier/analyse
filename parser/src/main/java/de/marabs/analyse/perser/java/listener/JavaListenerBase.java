@@ -35,13 +35,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static de.marabs.analyse.common.component.type.ComponentAttributeType.*;
 import static de.marabs.analyse.common.component.type.ComponentAttributeType.SOURCE_NAME;
+import static de.marabs.analyse.common.component.type.ComponentAttributeType.*;
 import static de.marabs.analyse.common.component.type.ComponentType.*;
 import static de.marabs.analyse.common.constant.ParserConstants.*;
 import static de.marabs.analyse.parser.generated.java.JavaParser.*;
 import static java.io.File.separator;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -88,7 +87,7 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
      *     <li>Top level type declarations of class and interface and enum types.</li>
      * </ul>
      *
-     * @param ctx the context
+     * @param ctx the parsing context
      */
     @Override
     public void enterCompilationUnit(CompilationUnitContext ctx) {
@@ -109,7 +108,7 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
      * </ul>
      * The packages <b>java</b>, <b>java.lang</b>, and <b>java.io</b> are always observable.
      *
-     * @param ctx the context
+     * @param ctx the parsing context
      */
     @Override
     public void enterPackageDeclaration(PackageDeclarationContext ctx) {
@@ -126,12 +125,6 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
 
         parsingContext.hasPackage(true);
         parsingContext.setCurrentComponent(currentComponent);
-
-        String uniquePackageName = currentComponent.getUniqueCoordinate();
-        Component component = application.findApplicationComponentByUniqueCoordinate(uniquePackageName);
-        if (nonNull(component)) {
-            parsingContext.addComponentWithVisibleChildren(component);
-        }
     }
 
     /**
@@ -151,25 +144,9 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
             importType = isMultipleImport ? JAVA_IMPORT_ON_DEMAND : JAVA_IMPORT;
         }
 
-        // We create a child component with a flavour of import type
         String importName = ctx.qualifiedName().getText();
         Component importComponent = createComponent(importType, importName);
         parsingContext.addImport(importComponent);
-
-        Component component = application.findApplicationComponentByUniqueCoordinate(importName);
-        if (isNull(component)) {
-            component = application.findLibraryComponentByUniqueCoordinate(importName);
-        }
-
-        if (nonNull(component)) {
-            if (isMultipleImport) {
-                parsingContext.addComponentWithVisibleChildren(component);
-            } else {
-                parsingContext.addVisibleComponentIfNotContained(component);
-            }
-        } else {
-            LOGGER.warn("We have an unknown import: " + importName);
-        }
     }
 
     // #################################################################################################################
@@ -265,7 +242,6 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
 
     @Override
     public void exitInterfaceMemberDeclaration(InterfaceMemberDeclarationContext ctx) {
-        super.exitInterfaceMemberDeclaration(ctx);
         // All field declarations are already visited in the first listener even though the member fields are not yet
         // handled (as we cannot yet know all types). Nevertheless, all modifiers are collected and then randomly
         // attached to the next class, interface, etc. For this reason we now clear these attributes in the listener base
@@ -293,9 +269,8 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
         addCompilationUnitAttribute(newClass);
         addSourcePositionToComponentIfNotContained(newClass, ctx);
         addImportsToComponent(newClass);
-        // In order to be able to get qualified names for the parameterized types below we need
-        // to add the child to the parent before processing the type parameters. Otherwise we only
-        // get "T" or "List.T" instead of "java.lang.List.T"
+        // In order to be able to get qualified names for the parameterized types below we need to add the child to the
+        // parent before processing the type parameters. Otherwise, we only get "T" or "List.T" instead of "java.lang.List.T"
         addToCurrentComponentIfNotContained(newClass);
 
         // Modifiers are collected one level above
@@ -689,7 +664,7 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
         collectedModifiers.clear();
 
         if (addPublicIfNotSpecified && needToAddPublicModifier) {
-            addModifierToComponent(component, "public");
+            addModifierToComponent(component, JAVA_MODIFIER_PUBLIC);
         }
     }
 
@@ -712,7 +687,6 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
 
     private void createAndSetDefaultPackage() {
         Component newPackage = createComponent(JAVA_PACKAGE, JAVA_DEFAULT_PACKAGE_NAME);
-        addCompilationUnitAttribute(newPackage);
         Component currentComponent = parsingContext.getCurrentComponent();
         currentComponent.addChild(newPackage);
         parsingContext.setCurrentComponent(newPackage);
@@ -767,33 +741,14 @@ public abstract class JavaListenerBase extends JavaParserBaseListener implements
     private void initParsingContext() {
         initParsingContextWithPackage(JAVA_LANG_PACKAGE);
         initParsingContextWithPackage(JAVA_IO_PACKAGE);
-
-        // Special case - if we are in the process of PARSING java.lang we also need to look into the application
-        // which will only become the library after completion
-        Component javaLang = application.findApplicationComponentByUniqueCoordinate(JAVA_LANG_PACKAGE);
-        if (nonNull(javaLang)) {
-            parsingContext.addComponentWithVisibleChildren(javaLang);
-        }
-        Component javaIo = application.findApplicationComponentByUniqueCoordinate(JAVA_IO_PACKAGE);
-        if (nonNull(javaIo)) {
-            parsingContext.addComponentWithVisibleChildren(javaIo);
-        }
-
-        // We can always start looking at components from the top - this is the case e.g. when writing fully qualified
-        // class names. We do this for both the application and the library
-        parsingContext.addComponentWithVisibleChildren(application.getComponents());
-        application.getLibraries().forEach(library -> parsingContext.addComponentWithVisibleChildren(library));
     }
 
     private void initParsingContextWithPackage(String packageName) {
-        Component javaLang = application.findLibraryComponentByUniqueCoordinate(packageName);
-        if (isNull(javaLang)) {
-            javaLang = application.findApplicationComponentByUniqueCoordinate(packageName);
-        }
-        if (isNull(javaLang)) {
-            LOGGER.warn("Can not find library: " + packageName);
+        Component packageComponent = application.findComponentByUniqueCoordinate(packageName);
+        if (nonNull(packageComponent)) {
+            parsingContext.addComponentWithVisibleChildren(packageComponent);
         } else {
-            parsingContext.addComponentWithVisibleChildren(javaLang);
+            LOGGER.warn("Can not find package '{}' in the application or libraries.", packageName);
         }
     }
 }
