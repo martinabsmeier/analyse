@@ -71,7 +71,7 @@ public class SourceParser {
         extensions.forEach(extension -> {
             List<File> filesToParse = FileUtils.findFiles(directory, extension);
             if (filesToParse.size() > 0) {
-                LOGGER.info("Reading files with extension [{}}] from directory -> {}", extension ,directory.getAbsolutePath());
+                LOGGER.info("Reading files with extension [{}] from directory -> {}", extension ,directory.getAbsolutePath());
                 LOGGER.info(SEPARATOR);
 
                 SourceParserBase parser = findParserByType(type);

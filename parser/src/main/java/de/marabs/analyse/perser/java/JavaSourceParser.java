@@ -28,6 +28,7 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,6 +48,8 @@ public class JavaSourceParser extends SourceParserBase {
 
     private static final Logger LOGGER = LogManager.getLogger(JavaSourceParser.class);
 
+    protected final StopWatch parseSw;
+
     /**
      * Creates a new instance of {@code JavaSourceParser} with the specified {@code libraries} class.
      *
@@ -55,6 +58,7 @@ public class JavaSourceParser extends SourceParserBase {
     @Builder
     public JavaSourceParser(Library... libraries) {
         super(JavaApplication.getInstance());
+        this.parseSw = new StopWatch();
         initDefaultListeners();
         initLibraries(libraries);
     }
@@ -116,7 +120,6 @@ public class JavaSourceParser extends SourceParserBase {
     @Override
     protected void initDefaultListeners() {
         String revisionId = determineRevisionId();
-
         defaultListeners.addAll(List.of(
             new JavaDeclarationListener(revisionId),
             new JavaStructureListener(revisionId)

@@ -51,7 +51,7 @@ public abstract class SourceParserBase {
     protected final ParseTreeWalker treeWalker;
     protected final ApplicationBase application;
     protected final StopWatch sw;
-    protected final StopWatch parseSw;
+    protected final StopWatch listenerSw;
     protected Integer numberOfFiles;
     protected Integer countFiles;
     protected List<ListenerBase> defaultListeners;
@@ -66,7 +66,7 @@ public abstract class SourceParserBase {
         this.application = application;
         this.treeWalker = DEFAULT;
         this.sw = new StopWatch();
-        this.parseSw = new StopWatch();
+        this.listenerSw = new StopWatch();
         this.defaultListeners = new ArrayList<>();
         this.listeners = new ArrayList<>();
     }
@@ -199,13 +199,16 @@ public abstract class SourceParserBase {
         numberOfFiles = parserResults.size();
 
         parserResults.forEach(parserResult -> {
+            listenerSw.start();
             listener.setSourceName(parserResult.getSourceName());
             treeWalker.walk(listener, parserResult.getParseTree());
             application.mergeWithApplication(listener.getResult());
             listener.reset();
+            listenerSw.stop();
 
-            LOGGER.info("Executed [{}] | File [{} of {}] -> {}", listenerName, countFiles, numberOfFiles, parserResult.getSourceName());
+            LOGGER.info("Executed [{}] | Duration [{}] | File [{} of {}] -> {}", listenerName, listenerSw.toString(), countFiles, numberOfFiles, parserResult.getSourceName());
             countFiles++;
+            listenerSw.reset();
         });
 
         sw.stop();
