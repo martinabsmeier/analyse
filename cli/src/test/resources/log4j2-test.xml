@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<Configuration status="DEBUG">
     <Properties>
         <Property name="logPath">target/log</Property>
         <Property name="logPattern">%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Property>
-        <Property name="fileName">${logPath}/common.log</Property>
-        <Property name="filePattern">${logPath}/common-%d{yyyy-MM-dd-hh}.log.gz</Property>
+        <Property name="fileName">${logPath}/cli.log</Property>
+        <Property name="filePattern">${logPath}/cli-%d{yyyy-MM-dd-hh}.log.gz</Property>
     </Properties>
 
     <Appenders>
@@ -18,14 +18,14 @@
             </PatternLayout>
 
             <Policies>
-                <SizeBasedTriggeringPolicy size="16 MB"/>
+                <SizeBasedTriggeringPolicy size="8 MB"/>
             </Policies>
             <DefaultRolloverStrategy max="5"/>
         </RollingFile>
     </Appenders>
 
     <Loggers>
-        <Root level="INFO">
+        <Root level="DEBUG">
             <AppenderRef ref="console-log"/>
             <AppenderRef ref="file-log"/>
         </Root>
